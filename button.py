@@ -1,4 +1,9 @@
-# button class mechanism written by BaralTech (see https://www.youtube.com/watch?v=GMBqjxcKogA)
+"""
+button class mechanism written by BaralTech (see https://www.youtube.com/watch?v=GMBqjxcKogA)
+- allows a button to be customised in terms of its image colour, hovering colour, text, and position
+- checks that if user hovers over button, it changes colour
+"""
+
 
 class Button():
     def __init__(self, image, pos, text_input, font, base_colour, hovering_colour):
@@ -15,6 +20,7 @@ class Button():
         self.text_rect = self.text.get_rect(center=(self.x_pos, self.y_pos))
 
     def update(self, screen):
+        # blit image or text to the screen
         if self.image is not None:
             screen.blit(self.image, self.rect)
         screen.blit(self.text, self.text_rect)

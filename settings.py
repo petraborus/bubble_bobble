@@ -1,3 +1,5 @@
+# uses different letters to represent teh different kinds of tiles and the player
+# this is what the level will look like
 level_map = [
     "                           ",
     "                           ",
@@ -14,6 +16,7 @@ level_map = [
     "z                         z",
     "yxxxxxxx    xxxx    xxxxxxy"]
 
+# basic variables that will stay constant: used througout difefrent parts of the code
 tile_size = 52
 screen_width = 1400
 screen_height = len(level_map) * tile_size

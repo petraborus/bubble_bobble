@@ -3,14 +3,17 @@ from settings import *
 from support import import_folder
 from arrow import Bullet
 
+# need to give access to bullets, so class is imported and group is created
 bullets = pygame.sprite.Group()
 
 
+# player class to get animations and movement working
 class Player(pygame.sprite.Sprite):
     # inherits abilities from pygame
     def __init__(self, pos):
         # call constructor for sprite before everything else
         super().__init__()
+
         # Graphics
         # dictionary locates graphics
         self.animations = {}
@@ -19,10 +22,11 @@ class Player(pygame.sprite.Sprite):
         # frame index picks out first image in the respective list
         self.frame_index = 0
         self.animation_speed = 0.15
-
         self.image = self.animations["idle"][self.frame_index]
+
         # rectangle for decisions
         self.rect = self.image.get_rect(topleft=pos)
+
         # property to tell us the direction the player is going
         # vector is an x and y coordinate for movement
         # when (0, 0) it is stationary
@@ -30,7 +34,6 @@ class Player(pygame.sprite.Sprite):
         self.speed = 8
         # negative value as y-axis is 'inverted' and moving up is negative
         self.jump_speed = -16
-        # negative value as y-axis is = and increases as it goes doen the screen
 
         # Sounds
         # must create sound and then can be called later
@@ -39,14 +42,15 @@ class Player(pygame.sprite.Sprite):
         self.is_jumping = False  # Add a variable to track jump status
         self.jumping = False
 
-        self.side = 1
-
         # Shooting
         self.bullets = bullets
         self.firing = False
 
+        # Player orientation
         self.status = "idle"
+        self.side = 1
 
+    # imports animations based on what the status is
     def animate(self):
         # animation depends on the state of a player
         animation = self.animations[self.status]
@@ -70,6 +74,7 @@ class Player(pygame.sprite.Sprite):
             full_path = character_path + animation
             self.animations[animation] = import_folder(full_path)
 
+    # player movement
     def get_input(self):
         keys = pygame.key.get_pressed()
 
@@ -83,7 +88,6 @@ class Player(pygame.sprite.Sprite):
         else:
             # stop movement if not pressing any keys
             self.direction.x = 0
-            # self.direction.y = 0
         if keys[pygame.K_UP] and not self.jumping:
             if not self.jumping and not self.is_jumping:  # Check if the player is already jumping
                 self.jumping = True
@@ -99,10 +103,12 @@ class Player(pygame.sprite.Sprite):
             self.firing = False
 
     def fire(self):
+        # creates bullet from the centre of the player and moves in the direction that the player is facing (by using 'side')
         bullet = Bullet((self.rect.centerx, self.rect.centery), self.side)
         self.bullets.add(bullet)
 
     def get_status(self):
+        # checks for the status, also checking what the 'side' is to determine if the animations used should be facing the right or the left
         if self.direction.y < 0:
             if self.side == 1:
                 self.status = "jump"
@@ -131,12 +137,13 @@ class Player(pygame.sprite.Sprite):
                 self.status = "jump_left"
             # goes against gravity - increases position
             self.direction.y = self.jump_speed
+            # play sound when jumping occurs
             pygame.mixer.Sound.play(self.jump_sound)
 
+    # prevents the player from going through the sides of the tiles
     def horizontal_movements_collision(self, tiles_general, tiles_edge):
-        # change the players x coordinate
+        # change the players x coordinate depending on their direction and speed
         self.rect.x += self.direction.x * self.speed
-        # self.rect.y += self.direction.y * self.speed
 
         for tile in tiles_general.sprites():
             if tile.rect.colliderect(self.rect):
@@ -172,6 +179,8 @@ class Player(pygame.sprite.Sprite):
                         self.status = "idle"
                     else:
                         self.status = "idle_left"
+            # no collision from teh bottom of the tile as I want the player to be able to jump onto the tile by going through it
+
         for tile in tiles_edge.sprites():
             if tile.rect.colliderect(self.rect):
                 if self.direction.y > 0:
@@ -189,7 +198,6 @@ class Player(pygame.sprite.Sprite):
                         self.status = "idle"
                     else:
                         self.status = "idle_left"
-                    # self.direction.y = 0
 
         for tile in tiles_portal.sprites():
             if tile.rect.colliderect(self.rect):
@@ -202,6 +210,7 @@ class Player(pygame.sprite.Sprite):
                     else:
                         self.status = "idle_left"
 
+        # set jumping back to false
         if self.direction.y >= 0:
             self.is_jumping = False
             self.jumping = False
@@ -212,6 +221,7 @@ class Player(pygame.sprite.Sprite):
         # constant force that constantly gets bigger (as it falls, gets faster)
         self.rect.y += self.direction.y
 
+    # function givees the illusion that if the player goes beyond a certain coordinate (where the purple tiles begin), they will appear on the other side of the screen, like going through a portal
     def portal(self):
         if self.rect.x > 1276:
             self.rect.x = 60
@@ -227,15 +237,6 @@ class Player(pygame.sprite.Sprite):
         self.portal()
         self.animate()
         self.bullets.update()
-        # self.get_life()
-
-        # enemy_fire_collision = pygame.sprite.groupcollide(self, fire, True, True)
-
-        # getting the player to come back on other side if it goes off-screen
-        # if self.rect.x > screen_width:
-            # self.rect.x == 0
-        # elif self.rect.x < 0:
-            # self.rect.x = screen_width
 
     def draw_bullets(self, surface):
         # draw all bullets to the screen
